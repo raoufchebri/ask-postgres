@@ -23,7 +23,7 @@ interface CorsOptions {
 }
 
 const defaultOptions: CorsOptions = {
-  origin: '*',
+  origin: ['http://localhost:6006/', 'http://localhost:6000/'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
   optionsSuccessStatus: 204,
