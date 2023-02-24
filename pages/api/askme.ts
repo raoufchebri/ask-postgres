@@ -1,6 +1,7 @@
 import { Client } from '@neondatabase/serverless';
 import cors, {initCors} from '../../lib/cors';
 import { createStream, CompletionParams } from '../../lib/createStream';
+import {Request} from "next/dist/compiled/@edge-runtime/primitives/fetch";
 // import {
 //   createParser,
 //   ParsedEvent,
@@ -23,12 +24,12 @@ const max_tokens = 1700;
 const MY_API_KEY = process.env.OPENAI_API_KEY ?? '';
 
 export const config = {
-  runtime: 'edge',
+  runtime: 'experimental-edge',
   regions: ['fra1'],
 };
 
 export default async (req: Request, res) => {
-  console.log(req.json())
+  console.log(req)
   const {query} = (await req.json()) as {
     query?: string;
   };
@@ -36,7 +37,7 @@ export default async (req: Request, res) => {
   if (!query) {
     return cors(req, new Response('No prompt in the request', {status: 400}));
   }
-  console.log('Query', 'query')
+  console.log('Query', query)
 
   let prompt = '';
 
