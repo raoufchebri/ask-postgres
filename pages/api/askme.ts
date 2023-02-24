@@ -28,7 +28,10 @@ export const config = {
 };
 
 export default async (req: Request, res) => {
-  await cors(req, res);
+  return cors(req, new Response("Hello world", {
+    status: 200,
+    headers: {'Content-Type': 'application/json'},
+  }));
 
   const {query} = (await req.json()) as {
     query?: string;
