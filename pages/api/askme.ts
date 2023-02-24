@@ -33,7 +33,7 @@ export default async (req: Request, res) => {
   };
 
   if (!query) {
-    return new Response('No prompt in the request', {status: 400});
+    return cors(req, new Response('No prompt in the request', {status: 400}));
   }
 
   let prompt = '';
