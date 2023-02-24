@@ -29,7 +29,11 @@ export const config = {
 };
 
 export default async (req: Request, res) => {
-  console.log(req)
+  console.log(req);
+
+  if (req.method === 'OPTIONS') {
+    return cors(req, res);
+  }
   const {query} = (await req.json()) as {
     query?: string;
   };
