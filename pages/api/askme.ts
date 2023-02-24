@@ -30,9 +30,10 @@ export const config = {
 
 export default async (req: Request, res) => {
   console.log(req);
+  console.log(res);
 
   if (req.method === 'OPTIONS') {
-    return cors(req, res);
+    return cors(req, new Response(null, { status: 200, headers: {} }));
   }
   const {query} = (await req.json()) as {
     query?: string;
