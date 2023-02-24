@@ -23,7 +23,7 @@ const max_tokens = 1700;
 const MY_API_KEY = process.env.OPENAI_API_KEY ?? '';
 
 export const config = {
-  runtime: 'experimental-edge',
+  runtime: 'edge',
   regions: ['fra1'],
 };
 
