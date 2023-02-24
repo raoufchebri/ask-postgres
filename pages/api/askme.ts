@@ -77,7 +77,7 @@ export default async (req: Request) => {
     // `cors` also takes care of handling OPTIONS requests
     return cors(
       req,
-      new Response("hello world", {
+      new Response(stream, {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       })
