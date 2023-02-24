@@ -36,15 +36,11 @@ export default async (req: Request) => {
     return new Response('No prompt in the request', { status: 400 });
   }
 
-  // Create context from embeddings
-  const context = await createContext(query);
-
-  // Checking prompt intent
-  const queryIntent = await getQueryIntent(query, context);
+  let prompt = '';
 
   const completionParams: CompletionParams = {
     model: 'text-davinci-003',
-    prompt: '',
+    prompt,
     temperature: 0.5,
     top_p: 1,
     frequency_penalty: 0,
@@ -53,28 +49,40 @@ export default async (req: Request) => {
     stream: true,
     n: 1,
   };
-  const questionPrompt = `You are an enthusiastic Postgres developer who loves Neon database and has a passion for helping answering developers might have. Answer the question asked by developers based on the context below. If the question can't be answered based on the context, say "Sorry :( I don't know."\n\nContext: ${context}\n\n---\n\nQuestion: ${query}\nAnswer:`;
 
-  const prompt = queryIntent.includes('Command')
-    ? await getCommandPrompt({
-        query,
-        context,
-        neon_api_key: MY_API_KEY,
-        completionParams,
+  try {
+    // Create context from embeddings
+    const context = await createContext(query);
+
+    // Checking prompt intent
+    const queryIntent = await getQueryIntent(query, context);
+    const questionPrompt = `You are an enthusiastic Postgres developer who loves Neon database and has a passion for helping answering developers might have. Answer the question asked by developers based on the context below. If the question can't be answered based on the context, say "Sorry :( I don't know."\n\nContext: ${context}\n\n---\n\nQuestion: ${query}\nAnswer:`;
+
+    prompt = queryIntent.includes('Command')
+      ? await getCommandPrompt({
+          query,
+          context,
+          neon_api_key: MY_API_KEY,
+          completionParams,
+        })
+      : questionPrompt;
+
+    // generate an id for the question
+  } catch (e) {
+    prompt = `write an error message to explain why the query errored.--\n\Error: ${JSON.stringify(
+      e
+    )}\nAnswer:`;
+  } finally {
+    const stream = await createStream({ ...completionParams, prompt });
+    // `cors` also takes care of handling OPTIONS requests
+    return cors(
+      req,
+      new Response(stream, {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
       })
-    : questionPrompt;
-
-  // generate an id for the question
-
-  const stream = await createStream({ ...completionParams, prompt });
-  // `cors` also takes care of handling OPTIONS requests
-  return cors(
-    req,
-    new Response(stream, {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  );
+    );
+  }
 };
 
 async function getCommandPrompt({

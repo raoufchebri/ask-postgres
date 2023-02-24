@@ -7,7 +7,7 @@ export const CMDK = () => {
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [isGoodAnswer, setIsGoodAnswer] = useState(undefined);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState<String>('');
 
   const answerQuestion = async (e: any) => {
