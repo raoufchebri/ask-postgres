@@ -28,11 +28,6 @@ export const config = {
 };
 
 export default async (req: Request, res) => {
-  return cors(req, new Response("Hello world", {
-    status: 200,
-    headers: {'Content-Type': 'application/json'},
-  }));
-
   const {query} = (await req.json()) as {
     query?: string;
   };
@@ -80,10 +75,10 @@ export default async (req: Request, res) => {
   } finally {
     const stream = await createStream({...completionParams, prompt});
     // `cors` also takes care of handling OPTIONS requests
-    return new Response(stream, {
+    return cors(req, new Response(stream, {
       status: 200,
       headers: {'Content-Type': 'application/json'},
-    })
+    }))
   }
 };
 
