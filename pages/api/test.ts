@@ -21,8 +21,7 @@ interface OpenAICompletionParams {
 
 const query = 'full text search';
 const max_tokens = 1700;
-const MY_API_KEY =
-  '7dvt479eou2u5f5eng8wfwo5hozigoa1fn4m4nldp1hlp11ciiaj8jrlbhd0722s';
+const MY_API_KEY = process.env.OPENAI_API_KEY ?? '';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   // Create embeddings for the question

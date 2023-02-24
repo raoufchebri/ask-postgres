@@ -5,53 +5,113 @@ import { motion } from 'framer-motion';
 
 export const CMDK = () => {
   const ref = React.useRef<HTMLDivElement | null>(null);
-  const [inputValue, setInputValue] = useState('');
-  const [isGoodAnswer, setIsGoodAnswer] = useState(undefined);
+  const [query, setQuery] = useState('');
+  const [suggestedAnswer, setSuggestedAnswer] = useState('');
+  const [feedback, setFeedback] = useState(undefined);
   const [loading, setLoading] = useState(false);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [answer, setAnswer] = useState<String>('');
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const answerQuestion = async (e: any) => {
     e.preventDefault();
     setAnswer('');
     setLoading(true);
-    const url = '/api/askme';
-    const response = await fetch(url, {
+    const askmeUrl = '/api/askme';
+    const summaryUrl = '/api/summary';
+    const params = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: inputValue,
+        query: query,
       }),
+    };
+
+    // fetch(summaryUrl, params).then(async (response) => {
+    //   console.log('Edge function returned.');
+
+    //   if (!response.ok) {
+    //     throw new Error(response.statusText);
+    //   }
+
+    //   // This data is a ReadableStream
+    //   const data = response.body;
+    //   if (!data) {
+    //     return;
+    //   }
+
+    //   const reader = data.getReader();
+    //   const decoder = new TextDecoder();
+    //   let done = false;
+
+    //   while (!done) {
+    //     const { value, done: doneReading } = await reader.read();
+    //     done = doneReading;
+    //     const chunkValue = decoder.decode(value);
+    //     setAnswer((prev) => prev + chunkValue);
+    //   }
+    // });
+
+    fetch(askmeUrl, params).then(async (response) => {
+      // setAnswer('');
+      console.log('Edge function returned.');
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      // This data is a ReadableStream
+      const data = response.body;
+      if (!data) {
+        return;
+      }
+
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+        setAnswer((prev) => prev + chunkValue);
+      }
+      setLoading(false);
     });
-    console.log('Edge function returned.');
-
-    if (!response.ok) {
-      throw new Error(response.statusText);
-    }
-
-    // This data is a ReadableStream
-    const data = response.body;
-    if (!data) {
-      return;
-    }
-
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-
-    while (!done) {
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      setAnswer((prev) => prev + chunkValue);
-    }
-
-    setLoading(false);
   };
 
+  async function submitFeedback() {
+    console.log({
+      query,
+      answer,
+      suggestedAnswer,
+      feedback,
+    });
+    setFeedbackLoading(true);
+    const response = await fetch('/api/fine-tune-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        answer,
+        suggestedAnswer,
+        feedback,
+      }),
+    });
+
+    const data = await response.json();
+    console.log(data);
+    setFeedbackSubmitted(true);
+    setFeedbackLoading(false);
+  }
+
   const onKeyDown = (e: React.KeyboardEvent) => {
-    if (inputValue.length && e.key === 'Enter') {
+    setFeedbackLoading(false);
+    if (query.length && e.key === 'Enter') {
       bounce();
       answerQuestion(e);
     }
@@ -66,7 +126,7 @@ export const CMDK = () => {
         }
       }, 100);
 
-      setInputValue('');
+      // setQuery('');
     }
   }
 
@@ -77,7 +137,7 @@ export const CMDK = () => {
           autoFocus
           placeholder='Ask me about Neon and Postgres'
           onValueChange={(value) => {
-            setInputValue(value);
+            setQuery(value);
           }}
         />
         <Command.List
@@ -127,17 +187,13 @@ export const CMDK = () => {
                   transition={{ duration: 0.5 }}
                 >
                   <ThumbsUpIcon
-                    filled={isGoodAnswer}
-                    onClick={() =>
-                      setIsGoodAnswer(isGoodAnswer ? undefined : true)
-                    }
+                    filled={feedback}
+                    onClick={() => setFeedback(feedback ? undefined : true)}
                   />
                   <ThumbsDownIcon
-                    filled={isGoodAnswer !== undefined && !isGoodAnswer}
+                    filled={feedback !== undefined && !feedback}
                     onClick={() =>
-                      setIsGoodAnswer(
-                        isGoodAnswer === false ? undefined : false
-                      )
+                      setFeedback(feedback === false ? undefined : false)
                     }
                   />
                 </motion.div>
@@ -145,6 +201,66 @@ export const CMDK = () => {
             )}
           </div>
         </Command.List>
+        {feedback === false && !feedbackSubmitted && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <textarea
+                placeholder='Propose an answer?'
+                style={{
+                  width: '100%',
+                  height: 100,
+                  borderRadius: 4,
+                  borderColor: '#343434',
+                  padding: 8,
+                  fontSize: 14,
+                  outline: 'none',
+                  backgroundColor: 'inherit',
+                  color: '#a1a1a1',
+                }}
+                onChange={(e) => {
+                  setSuggestedAnswer(e.target.value);
+                }}
+              />
+              {/* add a submit button at the right bottom corner of the parent div */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 48,
+                  right: 0,
+                  margin: '16px', // add some margin for spacing
+                }}
+              >
+                <button
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    color: '#a1a1a1',
+                  }}
+                  onClick={submitFeedback}
+                >
+                  {feedbackLoading ? (
+                    <LoadingDots color='white' style='large' />
+                  ) : (
+                    'Submit feedback'
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </Command>
     </div>
   );

@@ -41,7 +41,7 @@ export default function Home() {
       <div className={styles.content}>
         <div className={styles.meta}>
           <div className={styles.info}>
-            <h1>pg-guru</h1>
+            <h1>slonik</h1>
             <p>Press ⌘ K to get started.</p>
           </div>
         </div>
