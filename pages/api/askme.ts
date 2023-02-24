@@ -28,6 +28,7 @@ export const config = {
 };
 
 export default async (req: Request, res) => {
+  console.log(req.json())
   const {query} = (await req.json()) as {
     query?: string;
   };
@@ -35,6 +36,7 @@ export default async (req: Request, res) => {
   if (!query) {
     return cors(req, new Response('No prompt in the request', {status: 400}));
   }
+  console.log('Query', 'query')
 
   let prompt = '';
 
