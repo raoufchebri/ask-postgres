@@ -1,6 +1,7 @@
 import { Client } from '@neondatabase/serverless';
-import cors from '../../lib/cors';
 import { createStream, CompletionParams } from '../../lib/createStream';
+import NextCors from "nextjs-cors";
+import {NextApiRequest, NextApiResponse} from "next";
 // import {
 //   createParser,
 //   ParsedEvent,
@@ -27,13 +28,22 @@ export const config = {
   regions: ['fra1'],
 };
 
-export default async (req: Request) => {
-  const { query } = (await req.json()) as {
-    query?: string;
-  };
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  // Run the cors middleware
+  // nextjs-cors uses the cors package, so we invite you to check the documentation https://github.com/expressjs/cors
+  await NextCors(req, res, {
+    // Options
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    origin: ["http://localhost:6006/"],
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  });
 
+  const query = req.body.search;
+
+  console.log('request got', req)
   if (!query) {
-    return new Response('No prompt in the request', { status: 400 });
+    res.status(400).json('No prompt in the request');
+    return;
   }
 
   let prompt = '';
@@ -74,14 +84,11 @@ export default async (req: Request) => {
     )}\nAnswer:`;
   } finally {
     const stream = await createStream({ ...completionParams, prompt });
-    // `cors` also takes care of handling OPTIONS requests
-    return cors(
-      req,
-      new Response(stream, {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    );
+
+    return new Response(stream, {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 };
 
