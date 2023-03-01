@@ -47,7 +47,8 @@ export default function Home() {
             </p>
           </div>
         </div>
-        <Popover.Root open={open} onOpenChange={setOpen} modal>
+        {/* <Popover.Root open={open} onOpenChange={setOpen} modal> */}
+        <Popover.Root open={true}>
           <Popover.Trigger
             cmdk-raycast-subcommand-trigger=''
             onClick={() => setOpen(true)}

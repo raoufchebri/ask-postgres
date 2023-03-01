@@ -6,7 +6,7 @@ import { Request } from 'next/dist/compiled/@edge-runtime/primitives/fetch';
 const max_tokens = 1700;
 
 export const config = {
-  runtime: 'experimental-edge',
+  runtime: 'edge',
   regions: ['fra1'],
 };
 
