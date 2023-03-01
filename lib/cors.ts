@@ -23,10 +23,10 @@ interface CorsOptions {
 }
 
 const defaultOptions: CorsOptions = {
-  origin: '*',
+  origin: ['http://localhost:6006', 'http://localhost:60000'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
-  optionsSuccessStatus: 204,
+  optionsSuccessStatus: 200,
 };
 
 function isOriginAllowed(origin: string, allowed: StaticOrigin): boolean {

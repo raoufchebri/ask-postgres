@@ -1,6 +1,7 @@
 import { Client } from '@neondatabase/serverless';
-import cors from '../../lib/cors';
+import cors, {initCors} from '../../lib/cors';
 import { createStream, CompletionParams } from '../../lib/createStream';
+import {Request} from "next/dist/compiled/@edge-runtime/primitives/fetch";
 // import {
 //   createParser,
 //   ParsedEvent,
@@ -27,14 +28,21 @@ export const config = {
   regions: ['fra1'],
 };
 
-export default async (req: Request) => {
-  const { query } = (await req.json()) as {
+export default async (req: Request, res) => {
+  console.log(req);
+  console.log(res);
+
+  if (req.method === 'OPTIONS') {
+    return cors(req, new Response(null, { status: 200, headers: {} }));
+  }
+  const {query} = (await req.json()) as {
     query?: string;
   };
 
   if (!query) {
-    return new Response('No prompt in the request', { status: 400 });
+    return cors(req, new Response('No prompt in the request', {status: 400}));
   }
+  console.log('Query', query)
 
   let prompt = '';
 
@@ -60,11 +68,11 @@ export default async (req: Request) => {
 
     prompt = queryIntent.includes('Command')
       ? await getCommandPrompt({
-          query,
-          context,
-          neon_api_key: MY_API_KEY,
-          completionParams,
-        })
+        query,
+        context,
+        neon_api_key: MY_API_KEY,
+        completionParams,
+      })
       : questionPrompt;
 
     // generate an id for the question
@@ -73,15 +81,12 @@ export default async (req: Request) => {
       e
     )}\nAnswer:`;
   } finally {
-    const stream = await createStream({ ...completionParams, prompt });
+    const stream = await createStream({...completionParams, prompt});
     // `cors` also takes care of handling OPTIONS requests
-    return cors(
-      req,
-      new Response(stream, {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    );
+    return cors(req, new Response(stream, {
+      status: 200,
+      headers: {'Content-Type': 'application/json'},
+    }))
   }
 };
 
