@@ -5,7 +5,7 @@ import { CMDK } from '../components';
 import * as Popover from '@radix-ui/react-popover';
 
 export default function Home() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef(null);
 
@@ -13,7 +13,7 @@ export default function Home() {
     function listener(e: KeyboardEvent) {
       if (e.key === 'k' && e.metaKey) {
         e.preventDefault();
-        setOpen((o) => !o);
+        // setOpen((o) => !o);
       }
     }
 
@@ -41,8 +41,10 @@ export default function Home() {
       <div className={styles.content}>
         <div className={styles.meta}>
           <div className={styles.info}>
-            <h1>slonik</h1>
-            <p>Press ⌘ K to get started.</p>
+            <h1>Postgres Q&A</h1>
+            <p>
+              Answers PostgreSQL questions. Powered by OpenAI, Vercel and Neon.
+            </p>
           </div>
         </div>
         <Popover.Root open={open} onOpenChange={setOpen} modal>

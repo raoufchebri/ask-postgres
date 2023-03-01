@@ -18,7 +18,7 @@ export const CMDK = () => {
     setAnswer('');
     setLoading(true);
     const askmeUrl = '/api/askme';
-    const summaryUrl = '/api/summary';
+    // const summaryUrl = '/api/summary';
     const params = {
       method: 'POST',
       headers: {
@@ -55,9 +55,6 @@ export const CMDK = () => {
     // });
 
     fetch(askmeUrl, params).then(async (response) => {
-      // setAnswer('');
-      console.log('Edge function returned.');
-
       if (!response.ok) {
         throw new Error(response.statusText);
       }
@@ -135,7 +132,7 @@ export const CMDK = () => {
       <Command ref={ref} onKeyDown={onKeyDown}>
         <Command.Input
           autoFocus
-          placeholder='Ask me about Neon and Postgres'
+          placeholder='Ask me about Postgres'
           onValueChange={(value) => {
             setQuery(value);
           }}
