@@ -17,7 +17,7 @@ export const CMDK = () => {
     e.preventDefault();
     setAnswer('');
     setLoading(true);
-    const askmeUrl = '/api/askme';
+    const askmeUrl = '/api/askpg';
     // const summaryUrl = '/api/summary';
     const params = {
       method: 'POST',
