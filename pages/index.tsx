@@ -41,9 +41,9 @@ export default function Home() {
       <div className={styles.content}>
         <div className={styles.meta}>
           <div className={styles.info}>
-            <h1>Ask Postgres</h1>
+            <h1>Ask Neon</h1>
             <p>
-              Answers PostgreSQL and Neon related questions. Powered by OpenAI,
+              Answers questions about Postgres and Neon. Powered by OpenAI,
               Vercel and Neon.
             </p>
           </div>
